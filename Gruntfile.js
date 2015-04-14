@@ -39,14 +39,14 @@ module.exports = function(grunt) {
       },
       my_target: {
         files: {
-          'app/dist/index.min.js': ['app/js/index.js']
+          'app/dist/tetris.min.js': ['app/js/tetris.js']
         }
       }
     },
     processhtml: {
       dist: {
         files: {
-          'index.min.html': ['index.html']
+          'app/index.min.html': ['app/index.html']
         }
       }
     },
@@ -61,16 +61,16 @@ module.exports = function(grunt) {
             'http://yoav-zibin.github.io/emulator/angular-translate/angular-translate.2.6.1.min.js',
             'languages/en.js',
             'http://yoav-zibin.github.io/emulator/main.css',
-            'dist/index.min.js'
+            'dist/tetris.min.js'
           ],
           network: [
             'languages/en.js',
-            'dist/index.min.js.map',
-            'dist/index.js'
+            'dist/tetris.min.js.map',
+            'js/tetris.js'
           ],
           timestamp: true
         },
-        dest: 'app/index.appcache',
+        dest: 'app/tetris.appcache',
         src: []
       }
     },
