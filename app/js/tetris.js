@@ -259,9 +259,9 @@ function createCanvasController(canvas) {
   // draw a single square at (x, y) with color 
   function drawCell(x, y, color) {
     ctx.fillStyle = color;
-    ctx.fillRect(x*cellWidth, y*cellHeight, cellWidth-1, cellHeight-1);
+    ctx.fillRect(x*cellWidth, y*cellHeight, cellWidth, cellHeight);
     ctx.strokeStyle = "white";
-    ctx.strokeRect(x*cellWidth, y*cellHeight, cellWidth-1, cellHeight-1);
+    ctx.strokeRect(x*cellWidth, y*cellHeight, cellWidth, cellHeight);
   }
 
   function draw() {
@@ -371,7 +371,7 @@ function createCanvasController(canvas) {
         : key === 38 ? "up"
         : key === 39 ? "right"
         : key === 40 ? "down" : null;
-    if (dir !== null) {
+    if (dir !== null && isGameOngoing) {
       keyPressed(dir);
       draw();
     }
@@ -379,6 +379,9 @@ function createCanvasController(canvas) {
 
   var lastX = null, lastY = null;
   function processTouch(e) {
+    if (!isGameOngoing) {
+      return;
+    }
     e.preventDefault(); // prevent scrolling and dispatching mouse events.
     var touchobj = e.targetTouches[0]; // targetTouches includes only touch points in this canvas.
     if (!touchobj) {
