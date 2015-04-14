@@ -12,7 +12,7 @@ var cellWidth = 20;
 var cellHeight = 20;
 var colsNum = canvasWidth / cellWidth;
 var rowsNum = canvasHeight / cellHeight;
-var drawEveryMilliseconds = 400;
+var drawEveryMilliseconds = 360;
 
 // There are 1-8 players.
 // Colors:
@@ -41,7 +41,8 @@ function createCanvasController(canvas) {
               // shape is 4x4 array, x and y is the cordinate, index indicates what kind of shape in shapes
 
   //all the shapes
-  var shapes =  [[ 1, 1, 1, 1 ],
+  var shapes =  [[ 0, 0, 0, 0, 
+                   1, 1, 1, 1 ],
                  [ 1, 1, 1, 0,
                    1 ],
                  [ 1, 1, 1, 0,
@@ -70,11 +71,13 @@ function createCanvasController(canvas) {
     }
   }
 
+  var countDownInterval;
+   
   function gotStartMatch(params) {
     yourPlayerIndex = params.yourPlayerIndex;
     playersInfo = params.playersInfo;
     matchController = params.matchController;
-    isGameOngoing = true;
+    //isGameOngoing = true;
     isSinglePlayer = playersInfo.length === 1;
 
     pieceCreatedNum = 0;
@@ -85,7 +88,9 @@ function createCanvasController(canvas) {
     init();
     createPiece();
     startMatchTime = new Date().getTime();
-    setDrawInterval();
+    stopCountDownInterval();
+    countDownInterval = setInterval(drawCountDown, 250);
+    //setDrawInterval();
   }
 
   function gotMessage(params) {
@@ -148,7 +153,7 @@ function createCanvasController(canvas) {
 
     piece.shape = shape;
     piece.x = 4;
-    piece.y = 0;
+    piece.y = index === 0 ? -1 : 0;
     piece.index = index;
 
     pieceCreatedNum++;
@@ -191,6 +196,7 @@ function createCanvasController(canvas) {
       freeze();
       clearLines();
       createPiece();
+      setDrawInterval();
     }
   }
 
@@ -229,12 +235,25 @@ function createCanvasController(canvas) {
   }
 
   // returns rotates the rotated shape 'current' perpendicularly anticlockwise
-  function rotate(shape) {
+  function rotate(shape, index) {
+    if (index === 3) {
+      return angular.copy(shape);
+    }
     var newShape = [];
-    for (var y = 0; y < 4; ++y) {
-      newShape[y] = [];
-      for (var x = 0; x < 4; ++x) {
-        newShape[y][x] = shape[3 - x][y];
+    var x, y;
+    if (index === 0) {
+      for (y = 0; y < 4; ++y) {
+        newShape[y] = [];
+        for (x = 0; x < 4; ++x) {
+          newShape[y][x] = shape[3 - x][y];
+        }
+      }
+    } else {
+      for (y = 0; y < 4; ++y) {
+        newShape[y] = [];
+        for (x = 0; x < 3; ++x) {
+          newShape[y][x] = shape[2 - x][y];
+        }
       }
     }
     return newShape;
@@ -247,21 +266,25 @@ function createCanvasController(canvas) {
 
   function setDrawInterval() {
     stopDrawInterval();
-    // Every 10 shapes we increase the snake speed (to a max of 100ms interval).
-    var intervalMillis = Math.max(100, drawEveryMilliseconds - 20 * Math.floor(pieceCreatedNum / 10));
+    // Every 20 shapes we increase the speed (to a max of 100ms interval).
+    var intervalMillis = Math.max(120, drawEveryMilliseconds - 20 * Math.floor(pieceCreatedNum / 20));
     drawInterval = setInterval(updateAndDraw, intervalMillis);
   }
 
   function stopDrawInterval() {
     clearInterval(drawInterval);
   }
+
+  function stopCountDownInterval() {
+    clearInterval(countDownInterval);
+  }
   
   // draw a single square at (x, y) with color 
   function drawCell(x, y, color) {
     ctx.fillStyle = color;
-    ctx.fillRect(x*cellWidth, y*cellHeight, cellWidth, cellHeight);
+    ctx.fillRect(x*cellWidth, y*cellHeight, cellWidth-1, cellHeight-1);
     ctx.strokeStyle = "white";
-    ctx.strokeRect(x*cellWidth, y*cellHeight, cellWidth, cellHeight);
+    ctx.strokeRect(x*cellWidth, y*cellHeight, cellWidth-1, cellHeight-1);
   }
 
   function draw() {
@@ -270,9 +293,21 @@ function createCanvasController(canvas) {
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
     ctx.strokeStyle = "black";
     ctx.strokeRect(0, 0, canvasWidth, canvasHeight);
-    
-    var x, y;
-    
+
+    //Lets paint the score
+    for (var i = 0; i < allScores.length; i++) {
+      ctx.font = '12px sans-serif';
+      var color = playerColor[i];
+      ctx.fillStyle = color;
+      ctx.textBaseline = "top";
+      var msg = $translate.instant("COLOR_SCORE_IS",
+          {color: $translate.instant(color.toUpperCase()), score: "" + allScores[i]});
+      var cordX = 5 + i % 4 * canvasWidth / (playersInfo.length > 4 ? 4 : playersInfo.length);
+      var cordY = 5 + Math.floor(i / 4) * 15;
+      ctx.fillText(msg, cordX, cordY);
+    }
+
+    var x, y;    
     //draw board
     for (x = 0; x < colsNum; ++x) {
       for (y = 0; y < rowsNum; ++y) {
@@ -290,26 +325,9 @@ function createCanvasController(canvas) {
         }
       }
     }
-
-    //Lets paint the score
-    for (var i = 0; i < allScores.length; i++) {
-      ctx.font = '12px sans-serif';
-      var color = playerColor[i];
-      ctx.fillStyle = color;
-      ctx.textBaseline = "top";
-      var msg = $translate.instant("COLOR_SCORE_IS",
-          {color: $translate.instant(color.toUpperCase()), score: "" + allScores[i]});
-      var cordX = 5 + i % 4 * canvasWidth / (playersInfo.length > 4 ? 4 : playersInfo.length);
-      var cordY = 5 + Math.floor(i / 4) * 15;
-      ctx.fillText(msg, cordX, cordY);
-    }
   }
 
-  function updateAndDraw()
-  {
-    if (!isGameOngoing) {
-      return;
-    }
+  function drawCountDown() {
     var secondsFromStart =
       Math.floor((new Date().getTime() - startMatchTime) / 1000);
     if (secondsFromStart < 3) {
@@ -330,6 +348,16 @@ function createCanvasController(canvas) {
       msg = $translate.instant("YOUR_COLOR",
           {color: $translate.instant(yourColor.toUpperCase())});
       ctx.fillText(msg, canvasWidth / 2 - 20 , canvasHeight / 4 - 5);
+    } else {
+      isGameOngoing = true;
+      stopCountDownInterval();
+      setDrawInterval();
+    }
+  }
+   
+  function updateAndDraw()
+  {
+    if (!isGameOngoing) {
       return;
     }
     tick();
@@ -356,7 +384,7 @@ function createCanvasController(canvas) {
         }
         break;
       case 'up':
-        var rotated = rotate(piece.shape);
+        var rotated = rotate(piece.shape, piece.index);
         if (valid(0, 0, rotated)) {
           piece.shape = rotated;
         }
@@ -365,7 +393,7 @@ function createCanvasController(canvas) {
   }
 
   //Lets add the keyboard controls now
-  document.addEventListener("keydown", function(e){
+  function processKey(e) {
     var key = e.which;
     var dir = key === 37 ? "left"
         : key === 38 ? "up"
@@ -375,7 +403,8 @@ function createCanvasController(canvas) {
       keyPressed(dir);
       draw();
     }
-  }, false);
+  }
+  document.addEventListener("keydown", processKey, false);
 
   var lastX = null, lastY = null;
   function processTouch(e) {
