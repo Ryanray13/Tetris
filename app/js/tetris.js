@@ -95,9 +95,9 @@ function createCanvasController(canvas) {
     // The array representing the cells of a player's snake.
     var messageObject = angular.fromJson(messageString);
     allScores[fromPlayerIndex] = messageObject.s;
-    while (pieceCreatedNum < messageObject.p) {
-      createPiece();
-    }
+    //while (pieceCreatedNum < messageObject.p) {
+      //createPiece();
+    //}
   }
 
   function gotEndMatch(endMatchScores) {
