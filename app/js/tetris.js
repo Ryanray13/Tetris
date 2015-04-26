@@ -97,7 +97,6 @@ function createCanvasController(canvas) {
     var fromPlayerIndex = params.fromPlayerIndex;
     var messageString = params.message;
     // {p: pieceCreatedNum, s: score}
-    // The array representing the cells of a player's snake.
     var messageObject = angular.fromJson(messageString);
     allScores[fromPlayerIndex] = messageObject.s;
     //while (pieceCreatedNum < messageObject.p) {
@@ -296,14 +295,14 @@ function createCanvasController(canvas) {
 
     //Lets paint the score
     for (var i = 0; i < allScores.length; i++) {
-      ctx.font = '12px sans-serif';
+      ctx.font = '10px sans-serif';
       var color = playerColor[i];
       ctx.fillStyle = color;
       ctx.textBaseline = "top";
-      var msg = $translate.instant("COLOR_SCORE_IS",
-          {color: $translate.instant(color.toUpperCase()), score: "" + allScores[i]});
-      var cordX = 5 + i % 4 * canvasWidth / (playersInfo.length > 4 ? 4 : playersInfo.length);
-      var cordY = 5 + Math.floor(i / 4) * 15;
+      var msg = $translate("COLOR_SCORE_IS",
+          {color: $translate(color.toUpperCase()), score: "" + allScores[i]});
+      var cordX = 3 + i % 4 * canvasWidth / (playersInfo.length > 4 ? 4 : playersInfo.length);
+      var cordY = 3 + Math.floor(i / 4) * 15;
       ctx.fillText(msg, cordX, cordY);
     }
 
@@ -342,11 +341,11 @@ function createCanvasController(canvas) {
       ctx.font = '70px sans-serif';
       ctx.fillText("" + secondsToReallyStart, canvasWidth / 2, canvasHeight / 2);
 
-      ctx.font = '20px sans-serif';
-      var msg = $translate.instant("YOUR_SNAKE_COLOR_IS");
-      ctx.fillText(msg, canvasWidth / 4 - 35, canvasHeight / 4 - 30);
-      msg = $translate.instant("YOUR_COLOR",
-          {color: $translate.instant(yourColor.toUpperCase())});
+      ctx.font = '19px sans-serif';
+      var msg = $translate("YOUR_TETRIS_COLOR_IS");
+      ctx.fillText(msg, 5, canvasHeight / 4 - 30);
+      msg = $translate("YOUR_COLOR",
+          {color: $translate(yourColor.toUpperCase())});
       ctx.fillText(msg, canvasWidth / 2 - 20 , canvasHeight / 4 - 5);
     } else {
       isGameOngoing = true;
@@ -463,8 +462,4 @@ realTimeService.init({
   canvasHeight: canvasHeight
 });
 
-}])
-.config(['$translateProvider', function($translateProvider) {
-  'use strict';
-  $translateProvider.init(['en', 'he']);
 }]);

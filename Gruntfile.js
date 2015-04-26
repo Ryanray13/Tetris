@@ -58,12 +58,12 @@ module.exports = function(grunt) {
             'http://ajax.googleapis.com/ajax/libs/angularjs/1.3.8/angular.min.js',
             'http://cdnjs.cloudflare.com/ajax/libs/seedrandom/2.3.11/seedrandom.min.js',
             'http://yoav-zibin.github.io/emulator/dist/realTimeServices.min.js',
-            'http://yoav-zibin.github.io/emulator/angular-translate/angular-translate.2.6.1.min.js',
-            'languages/en.js',
+            'http://yoav-zibin.github.io/emulator/angular-translate/angular-translate.min.js',
             'http://yoav-zibin.github.io/emulator/main.css',
             'dist/tetris.min.js'
           ],
           network: [
+            'languages/zh.js',
             'languages/en.js',
             'dist/tetris.min.js.map',
             'js/tetris.js'
