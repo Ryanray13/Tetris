@@ -1,4 +1,4 @@
-window.angularTranslations = {
+window.angularTranslationsLoaded('en', {
   YOUR_TETRIS_COLOR_IS: "Your Tetris color is",
   YOUR_COLOR: "{{color}}",
   COLOR_SCORE_IS: "{{color}}: {{score}}",
@@ -13,4 +13,4 @@ window.angularTranslations = {
   ORANGE: 'Orange',
   YELLOW: 'Yellow',
   SILVER: 'Silver'
-};
+});

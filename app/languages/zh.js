@@ -1,4 +1,4 @@
-window.angularTranslations = {
+window.angularTranslationsLoaded('zh', {
   YOUR_TETRIS_COLOR_IS: "你的俄罗斯方块颜色是",
   YOUR_COLOR: "{{color}}",
   COLOR_SCORE_IS: "{{color}}: {{score}}",
@@ -13,4 +13,4 @@ window.angularTranslations = {
   ORANGE: '橘色',
   YELLOW: '黄色',
   SILVER: '银色'
-};
+});
