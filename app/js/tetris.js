@@ -1,6 +1,6 @@
 angular.module('myApp', [])
-  .run(['$translate', '$log', 'realTimeService', 'randomService',
-      function ($translate, $log, realTimeService, randomService) {
+  .run(['$window', '$translate', '$log', 'realTimeService', 'randomService',
+      function ($window, $translate, $log, realTimeService, randomService) {
 'use strict';
 
 // Constants
@@ -23,8 +23,6 @@ var playerColor = [
   'pink', 'yellow', 'orange', 'silver',
 ];
 
-//var meter = new FPSMeter();
-
 function createCanvasController(canvas) {
   $log.info("createCanvasController for canvas.id=" + canvas.id);
   var isGameOngoing = false;
@@ -32,6 +30,7 @@ function createCanvasController(canvas) {
   var playersInfo = null;
   var yourPlayerIndex = null;
   var matchController = null;
+  var fpsmeter  = new $window.FPSMeter({ decimals: 0, graph: true, theme: 'dark', left: '5px' });
 
   // Game state
   //var allTetris; 
@@ -168,23 +167,21 @@ function createCanvasController(canvas) {
     offsetX = piece.x + offsetX;
     offsetY = piece.y + offsetY;
     newShape = newShape || piece.shape;
-                    console.log(piece);
+    var index = piece.index;
+
     for (var y = 0; y < 4; ++y) {
       for (var x = 0; x < 4; ++x) {
         if (newShape[y][x]) {
           if (typeof board[y + offsetY] === 'undefined' ||
-              typeof board[y + offsetY][x + offsetX] === 'undefined' ||
-              board[y + offsetY][x + offsetX] ||
-              x + offsetX < 0 ||
-              y + offsetY >= rowsNum ||
-              x + offsetX >= colsNum ) {
-              console.log(offsetX + ' ' + offsetY);
-            // lose if the current shape at the top row when checked
-            if (x + offsetX >= 0 && x + offsetX < colsNum && y + offsetY < rowsNum && board[y + offsetY][x + offsetX] && offsetY === 1){
-              stopDrawInterval();
-              lostMatch();
-            } 
+              typeof board[y + offsetY][x + offsetX] === 'undefined' ) {
             return false;
+          } else {
+            if (board[y + offsetY][x + offsetX]) {
+              if (index !== 0 && offsetY === 1 || index ===0 && offsetY === 0 ) {
+                lostMatch();
+              }
+              return false;
+            }
           }
         }
       }
@@ -273,10 +270,10 @@ function createCanvasController(canvas) {
   var intervalMillis = drawEveryMilliseconds;
 
   function setDrawInterval() {
-    stopDrawInterval();
+    //stopDrawInterval();
     // Every 10 shapes we increase the speed (to a max of 100ms interval).
-    intervalMillis = Math.max(100, drawEveryMilliseconds - 20 * Math.floor(pieceCreatedNum / 10));
-    drawInterval = requestAnimationFrame(updateAndDraw);
+    intervalMillis = Math.max(100, drawEveryMilliseconds - 20 * Math.floor(pieceCreatedNum / 1));
+    //drawInterval = requestAnimationFrame(updateAndDraw);
   }
 
   function stopDrawInterval() {
@@ -296,7 +293,7 @@ function createCanvasController(canvas) {
   }
 
   function draw() {
-
+   // fpsmeter.tickStart();
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
     ctx.strokeStyle = "black";
@@ -333,6 +330,7 @@ function createCanvasController(canvas) {
         }
       }
     }
+    //fpsmeter.tick();
   }
 
   function drawCountDown() {
@@ -361,19 +359,22 @@ function createCanvasController(canvas) {
       isGameOngoing = true;
       stopCountDownInterval();
       setDrawInterval();
+      drawInterval = requestAnimationFrame(updateAndDraw);
     }
   }
 
   var isReliable = false;
    
   function updateAndDraw(timestamp) {
+    fpsmeter .tickStart();
     if (!isGameOngoing) {
       return;
     }
+
     if (startTime < 0) {
       startTime = timestamp;
     }
-
+    
     var timelapse = timestamp - startTime;
     isReliable = false;
     if (timelapse >= intervalMillis) {
@@ -382,6 +383,7 @@ function createCanvasController(canvas) {
     }
     sendMessage(isReliable);
     draw();
+    fpsmeter .tick();
     drawInterval = requestAnimationFrame(updateAndDraw);
   }
 

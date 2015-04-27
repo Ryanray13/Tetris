@@ -31,7 +31,7 @@ module.exports = function(grunt) {
           console: false,
         },
       },
-      all: ['app/js/*.js', 'app/languages/*.js', 'realTimeService.js']
+      all: ['app/js/tetris.js', 'app/languages/*.js', 'realTimeService.js']
     },
     uglify: {
       options: {
