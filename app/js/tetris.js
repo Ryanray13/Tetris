@@ -1,6 +1,6 @@
 angular.module('myApp', [])
-  .run(['$window', '$translate', '$log', 'realTimeService', 'randomService',
-      function ($window, $translate, $log, realTimeService, randomService) {
+  .run(['$translate', '$log', 'realTimeService', 'randomService',
+      function ($translate, $log, realTimeService, randomService) {
 'use strict';
 
 // Constants
@@ -23,6 +23,8 @@ var playerColor = [
   'pink', 'yellow', 'orange', 'silver',
 ];
 
+var fpsmeter;
+
 function createCanvasController(canvas) {
   $log.info("createCanvasController for canvas.id=" + canvas.id);
   var isGameOngoing = false;
@@ -30,7 +32,6 @@ function createCanvasController(canvas) {
   var playersInfo = null;
   var yourPlayerIndex = null;
   var matchController = null;
-  var fpsmeter  = new $window.FPSMeter({ decimals: 0, graph: true, theme: 'dark', left: '5px' });
 
   // Game state
   //var allTetris; 
@@ -62,6 +63,7 @@ function createCanvasController(canvas) {
   ];
   var startMatchTime; // For displaying a countdown.
   
+  fpsmeter = new window.FPSMeter({graph: true, theme: 'dark', left: '5px'});
 
   function init() {
     for (var y = 0; y < rowsNum; ++y) {
@@ -272,7 +274,7 @@ function createCanvasController(canvas) {
   function setDrawInterval() {
     //stopDrawInterval();
     // Every 10 shapes we increase the speed (to a max of 100ms interval).
-    intervalMillis = Math.max(100, drawEveryMilliseconds - 20 * Math.floor(pieceCreatedNum / 1));
+    intervalMillis = Math.max(100, drawEveryMilliseconds - 20 * Math.floor(pieceCreatedNum / 10));
     //drawInterval = requestAnimationFrame(updateAndDraw);
   }
 
@@ -334,6 +336,7 @@ function createCanvasController(canvas) {
   }
 
   function drawCountDown() {
+    fpsmeter.tickStart();
     var secondsFromStart =
       Math.floor((new Date().getTime() - startMatchTime) / 1000);
     if (secondsFromStart < 3) {
@@ -354,6 +357,7 @@ function createCanvasController(canvas) {
       msg = $translate("YOUR_COLOR",
           {color: $translate(yourColor.toUpperCase())});
       ctx.fillText(msg, canvasWidth / 2 - 20 , canvasHeight / 4 - 5);
+      fpsmeter.tick();
       countDownInterval  = requestAnimationFrame(drawCountDown);
     } else {
       isGameOngoing = true;
@@ -366,7 +370,7 @@ function createCanvasController(canvas) {
   var isReliable = false;
    
   function updateAndDraw(timestamp) {
-    fpsmeter .tickStart();
+    fpsmeter.tickStart();
     if (!isGameOngoing) {
       return;
     }
@@ -383,7 +387,7 @@ function createCanvasController(canvas) {
     }
     sendMessage(isReliable);
     draw();
-    fpsmeter .tick();
+    fpsmeter.tick();
     drawInterval = requestAnimationFrame(updateAndDraw);
   }
 
