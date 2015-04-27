@@ -23,8 +23,6 @@ var playerColor = [
   'pink', 'yellow', 'orange', 'silver',
 ];
 
-var fpsmeter;
-
 function createCanvasController(canvas) {
   $log.info("createCanvasController for canvas.id=" + canvas.id);
   var isGameOngoing = false;
@@ -63,7 +61,7 @@ function createCanvasController(canvas) {
   ];
   var startMatchTime; // For displaying a countdown.
   
-  fpsmeter = new window.FPSMeter({graph: true, theme: 'dark', left: '5px'});
+  var fpsmeter; //fps meter
 
   function init() {
     for (var y = 0; y < rowsNum; ++y) {
@@ -77,6 +75,7 @@ function createCanvasController(canvas) {
   var countDownInterval;
    
   function gotStartMatch(params) {
+    fpsmeter = new window.FPSMeter({graph: true, theme: 'dark', left: '5px'});
     yourPlayerIndex = params.yourPlayerIndex;
     playersInfo = params.playersInfo;
     matchController = params.matchController;
