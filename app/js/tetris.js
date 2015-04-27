@@ -12,7 +12,7 @@ var cellWidth = 20;
 var cellHeight = 20;
 var colsNum = canvasWidth / cellWidth;
 var rowsNum = canvasHeight / cellHeight;
-var drawEveryMilliseconds = 360;
+var drawEveryMilliseconds = 400;
 
 // There are 1-8 players.
 // Colors:
@@ -22,6 +22,8 @@ var playerColor = [
   'blue', 'red', 'brown', 'purple',
   'pink', 'yellow', 'orange', 'silver',
 ];
+
+//var meter = new FPSMeter();
 
 function createCanvasController(canvas) {
   $log.info("createCanvasController for canvas.id=" + canvas.id);
@@ -89,7 +91,7 @@ function createCanvasController(canvas) {
     createPiece();
     startMatchTime = new Date().getTime();
     stopCountDownInterval();
-    countDownInterval = setInterval(drawCountDown, 250);
+    countDownInterval = requestAnimationFrame(drawCountDown);
     //setDrawInterval();
   }
 
@@ -106,9 +108,9 @@ function createCanvasController(canvas) {
 
   function gotEndMatch(endMatchScores) {
     // Note that endMatchScores can be null if the game was cancelled (e.g., someone disconnected).
+    stopDrawInterval();
     allScores = endMatchScores;
     isGameOngoing = false;
-    stopDrawInterval();
   }
 
   function sendMessage(isReliable) {
@@ -166,7 +168,7 @@ function createCanvasController(canvas) {
     offsetX = piece.x + offsetX;
     offsetY = piece.y + offsetY;
     newShape = newShape || piece.shape;
- 
+                    console.log(piece);
     for (var y = 0; y < 4; ++y) {
       for (var x = 0; x < 4; ++x) {
         if (newShape[y][x]) {
@@ -176,8 +178,10 @@ function createCanvasController(canvas) {
               x + offsetX < 0 ||
               y + offsetY >= rowsNum ||
               x + offsetX >= colsNum ) {
+              console.log(offsetX + ' ' + offsetY);
             // lose if the current shape at the top row when checked
-            if (offsetY === 1){
+            if (x + offsetX >= 0 && x + offsetX < colsNum && y + offsetY < rowsNum && board[y + offsetY][x + offsetX] && offsetY === 1){
+              stopDrawInterval();
               lostMatch();
             } 
             return false;
@@ -192,9 +196,13 @@ function createCanvasController(canvas) {
     if (valid(0, 1)) {
       ++piece.y;
     } else {
+      if(!isGameOngoing){
+        return;
+      }
       freeze();
       clearLines();
       createPiece();
+      isReliable = true;// If creating food (and increasing score), I want to pass the message reliably.
       setDrawInterval();
     }
   }
@@ -222,7 +230,6 @@ function createCanvasController(canvas) {
       }
       if (rowFilled) {
         allScores[yourPlayerIndex]++;
-        document.getElementById('clearsound').play();
         for (var yy = y; yy > 0; --yy) {
           for (var xx = 0; xx < colsNum; ++xx) {
             board[yy][xx] = board[yy - 1][xx];
@@ -262,20 +269,22 @@ function createCanvasController(canvas) {
   var ctx = canvas.getContext("2d");
 
   var drawInterval;
+  var startTime = -1;
+  var intervalMillis = drawEveryMilliseconds;
 
   function setDrawInterval() {
     stopDrawInterval();
-    // Every 20 shapes we increase the speed (to a max of 100ms interval).
-    var intervalMillis = Math.max(120, drawEveryMilliseconds - 20 * Math.floor(pieceCreatedNum / 20));
-    drawInterval = setInterval(updateAndDraw, intervalMillis);
+    // Every 10 shapes we increase the speed (to a max of 100ms interval).
+    intervalMillis = Math.max(100, drawEveryMilliseconds - 20 * Math.floor(pieceCreatedNum / 10));
+    drawInterval = requestAnimationFrame(updateAndDraw);
   }
 
   function stopDrawInterval() {
-    clearInterval(drawInterval);
+    cancelAnimationFrame(drawInterval);
   }
 
   function stopCountDownInterval() {
-    clearInterval(countDownInterval);
+    cancelAnimationFrame(countDownInterval);
   }
   
   // draw a single square at (x, y) with color 
@@ -347,22 +356,33 @@ function createCanvasController(canvas) {
       msg = $translate("YOUR_COLOR",
           {color: $translate(yourColor.toUpperCase())});
       ctx.fillText(msg, canvasWidth / 2 - 20 , canvasHeight / 4 - 5);
+      countDownInterval  = requestAnimationFrame(drawCountDown);
     } else {
       isGameOngoing = true;
       stopCountDownInterval();
       setDrawInterval();
     }
   }
+
+  var isReliable = false;
    
-  function updateAndDraw()
-  {
+  function updateAndDraw(timestamp) {
     if (!isGameOngoing) {
       return;
     }
-    tick();
-    var isReliable = true; // If creating food (and increasing score), I want to pass the message reliably.
+    if (startTime < 0) {
+      startTime = timestamp;
+    }
+
+    var timelapse = timestamp - startTime;
+    isReliable = false;
+    if (timelapse >= intervalMillis) {
+      startTime = timestamp;
+      tick();
+    }
     sendMessage(isReliable);
     draw();
+    drawInterval = requestAnimationFrame(updateAndDraw);
   }
 
   function keyPressed(dir) {
