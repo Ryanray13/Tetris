@@ -10,7 +10,7 @@ window.angularTranslationsLoaded('zh', {
   PURPLE: "紫色",
   BROWN: '棕色',
   PINK: '粉色',
-  ORANGE: '橘色',
+  ORANGE: '橙色',
   YELLOW: '黄色',
-  SILVER: '银色'
+  SILVER: '银灰色'
 });
