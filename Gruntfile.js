@@ -61,7 +61,8 @@ module.exports = function(grunt) {
             'http://yoav-zibin.github.io/emulator/angular-translate/angular-translate.min.js',
             'http://yoav-zibin.github.io/emulator/main.css',
             'https://raw.githubusercontent.com/darsain/fpsmeter/master/dist/fpsmeter.min.js',
-            'dist/tetris.min.js'
+            'dist/tetris.min.js',
+            'dist/fpsmeter.min.js'
           ],
           network: [
             'languages/zh.js',
