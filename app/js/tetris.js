@@ -1,4 +1,4 @@
-angular.module('myApp', [])
+angular.module('myApp', ['ngTouch', 'ui.bootstrap'])
   .run(['$translate', '$log', 'realTimeService', 'randomService',
       function ($translate, $log, realTimeService, randomService) {
 'use strict';
@@ -350,9 +350,9 @@ function createCanvasController(canvas) {
       ctx.font = '70px sans-serif';
       ctx.fillText("" + secondsToReallyStart, canvasWidth / 2, canvasHeight / 2);
 
-      ctx.font = '19px sans-serif';
+      ctx.font = '20px sans-serif';
       var msg = $translate("YOUR_TETRIS_COLOR_IS");
-      ctx.fillText(msg, 5, canvasHeight / 4 - 30);
+      ctx.fillText(msg, 20, canvasHeight / 4 - 30);
       msg = $translate("YOUR_COLOR",
           {color: $translate(yourColor.toUpperCase())});
       ctx.fillText(msg, canvasWidth / 2 - 20 , canvasHeight / 4 - 5);
