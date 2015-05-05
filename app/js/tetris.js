@@ -454,7 +454,7 @@ function createCanvasController(canvas) {
         : key === 38 ? "up"
         : key === 39 ? "right"
         : key === 40 ? "down" : null;
-    if (dir !== null && isGameOngoing) {
+    if (dir !== null && isGameOngoing && !$rootScope.isHelpModalShown) {
       keyPressed(dir);
       draw();
     }
