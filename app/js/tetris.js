@@ -101,7 +101,11 @@ function createCanvasController(canvas) {
     matchController = params.matchController;
     //isGameOngoing = true;
     isSinglePlayer = playersInfo.length === 1;
-    isSinglePlayerGlobal = isSinglePlayer;
+    if (isSinglePlayer) {
+      isSinglePlayerGlobal = isSinglePlayer;
+      totalPauseTime = 0;
+      pauseStartTime = 0;
+    }
 
     pieceCreatedNum = 0;
     allScores = [];
