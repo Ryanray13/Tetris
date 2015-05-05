@@ -1,6 +1,6 @@
 angular.module('myApp', ['ngTouch', 'ui.bootstrap'])
-  .run(['$translate', '$log', 'realTimeService', 'randomService',
-      function ($translate, $log, realTimeService, randomService) {
+  .run(['$rootScope', '$translate', '$log', 'realTimeService', 'randomService',
+      function ($rootScope, $translate, $log, realTimeService, randomService) {
 'use strict';
 
 // Constants
@@ -13,6 +13,23 @@ var cellHeight = 20;
 var colsNum = canvasWidth / cellWidth;
 var rowsNum = canvasHeight / cellHeight;
 var drawEveryMilliseconds = 400;
+
+$rootScope.isHelpModalShown = false;
+var isSinglePlayerGlobal = false;
+var totalPauseTime = 0;
+var pauseStartTime = 0;
+
+$rootScope.carouselClick = function () {
+  if (isSinglePlayerGlobal) {
+    $rootScope.isHelpModalShown = true;
+    pauseStartTime = new Date().getTime();
+  }
+};
+
+$rootScope.carouselClose = function () {
+  $rootScope.isHelpModalShown = false;
+  totalPauseTime += new Date().getTime() - pauseStartTime;
+};
 
 // There are 1-8 players.
 // Colors:
@@ -81,13 +98,14 @@ function createCanvasController(canvas) {
     matchController = params.matchController;
     //isGameOngoing = true;
     isSinglePlayer = playersInfo.length === 1;
+    isSinglePlayerGlobal = isSinglePlayer;
 
     pieceCreatedNum = 0;
     allScores = [];
     for (var index = 0; index < playersInfo.length; index++) {
       allScores[index] = 0;
     }
-    init();
+    init(); 
     createPiece();
     startMatchTime = new Date().getTime();
     stopCountDownInterval();
@@ -280,6 +298,7 @@ function createCanvasController(canvas) {
   function stopDrawInterval() {
     cancelAnimationFrame(drawInterval);
   }
+  $rootScope.stopDrawInterval = stopDrawInterval;
 
   function stopCountDownInterval() {
     cancelAnimationFrame(countDownInterval);
@@ -336,8 +355,12 @@ function createCanvasController(canvas) {
 
   function drawCountDown() {
     fpsmeter.tickStart();
-    var secondsFromStart =
-      Math.floor((new Date().getTime() - startMatchTime) / 1000);
+    var secondsFromStart = 0;
+    if ($rootScope.isHelpModalShown) {
+      secondsFromStart = Math.floor((pauseStartTime - totalPauseTime - startMatchTime) / 1000);
+    } else {
+      secondsFromStart = Math.floor((new Date().getTime() - totalPauseTime - startMatchTime) / 1000);
+    }
     if (secondsFromStart < 3) {
       // Countdown to really start
       draw();
@@ -367,13 +390,12 @@ function createCanvasController(canvas) {
   }
 
   var isReliable = false;
-   
+  
   function updateAndDraw(timestamp) {
     fpsmeter.tickStart();
     if (!isGameOngoing) {
       return;
     }
-
     if (startTime < 0) {
       startTime = timestamp;
     }
@@ -382,13 +404,16 @@ function createCanvasController(canvas) {
     isReliable = false;
     if (timelapse >= intervalMillis) {
       startTime = timestamp;
-      tick();
+      if (!$rootScope.isHelpModalShown) {
+        tick();
+      }
     }
     sendMessage(isReliable);
     draw();
     fpsmeter.tick();
     drawInterval = requestAnimationFrame(updateAndDraw);
   }
+  $rootScope.updateAndDraw = updateAndDraw;
 
   function keyPressed(dir) {
     switch (dir) {
