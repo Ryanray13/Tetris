@@ -51,8 +51,9 @@ function createCanvasController(canvas) {
   // Game state
   //var allTetris; 
   var allScores;
+  var allBoards;
   var pieceCreatedNum;
-  var board = []; // store the whole board, indicates cell that is not elimated
+  var board; // store the whole board, indicates cell that is not elimated
 
   var piece  = {};  // current piece {shape : shape, x : x, y : y, index : index }
               // shape is 4x4 array, x and y is the cordinate, index indicates what kind of shape in shapes
@@ -80,13 +81,15 @@ function createCanvasController(canvas) {
   
   var fpsmeter; //fps meter
 
-  function init() {
+  function createBoard() {
+    var newBoard = [];
     for (var y = 0; y < rowsNum; ++y) {
-      board[y] = [];
+      newBoard[y] = [];
       for (var x = 0; x < colsNum; ++x) {
-        board[y][x] = 0;
+        newBoard[y][x] = 0;
       }
     }
+    return newBoard;
   }
 
   var countDownInterval;
@@ -102,10 +105,12 @@ function createCanvasController(canvas) {
 
     pieceCreatedNum = 0;
     allScores = [];
+    allBoards = [];
     for (var index = 0; index < playersInfo.length; index++) {
+      allBoards[index] = createBoard();
       allScores[index] = 0;
     }
-    init(); 
+    board = allBoards[yourPlayerIndex];
     createPiece();
     startMatchTime = new Date().getTime();
     stopCountDownInterval();
@@ -119,6 +124,7 @@ function createCanvasController(canvas) {
     // {p: pieceCreatedNum, s: score}
     var messageObject = angular.fromJson(messageString);
     allScores[fromPlayerIndex] = messageObject.s;
+    allBoards[fromPlayerIndex] = messageObject.b;
     //while (pieceCreatedNum < messageObject.p) {
       //createPiece();
     //}
@@ -136,7 +142,7 @@ function createCanvasController(canvas) {
       return; // No need to send messages if you're the only player or game is over.
     }
     var messageString = angular.toJson(
-        {p: pieceCreatedNum, s: allScores[yourPlayerIndex]});
+        {p: pieceCreatedNum, s: allScores[yourPlayerIndex], b: board});
     if (isReliable) {
       matchController.sendReliableMessage(messageString);
     } else {
@@ -407,8 +413,8 @@ function createCanvasController(canvas) {
       if (!$rootScope.isHelpModalShown) {
         tick();
       }
+      sendMessage(isReliable);
     }
-    sendMessage(isReliable);
     draw();
     fpsmeter.tick();
     drawInterval = requestAnimationFrame(updateAndDraw);
