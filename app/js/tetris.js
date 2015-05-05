@@ -95,6 +95,7 @@ function createCanvasController(canvas) {
   var countDownInterval;
    
   function gotStartMatch(params) {
+    $rootScope.isHelpModalShown = false;
     fpsmeter = new window.FPSMeter({graph: true, theme: 'dark', left: '5px'});
     yourPlayerIndex = params.yourPlayerIndex;
     playersInfo = params.playersInfo;
