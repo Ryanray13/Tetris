@@ -15,8 +15,6 @@
   <!-- for seeding Math.random, see https://github.com/davidbau/seedrandom -->
   <script src="http://cdnjs.cloudflare.com/ajax/libs/seedrandom/2.3.11/seedrandom.min.js"></script>
   
-  <script crossorigin="anonymous" src="dist/fpsmeter.min.js"></script>
-  
   <script src="dist/tetris.min.js"></script>
 
   <script>window.angularTranslationLanguages = ['en', 'zh'];</script>
@@ -27,7 +25,7 @@
 </head>
 <body>
 
- <div style="position:absolute; bottom:5px; left: 5px">
+ <div style="position:absolute; bottom:5px; left: 5px; z-index:10;">
     <span ng-click="carouselClick()"
         class="glyphicon glyphicon-question-sign" aria-hidden="true"></span>
   </div>

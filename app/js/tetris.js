@@ -78,8 +78,6 @@ function createCanvasController(canvas) {
     'cyan', 'orange', 'blue', 'yellow', 'red', 'green', 'purple'
   ];
   var startMatchTime; // For displaying a countdown.
-  
-  var fpsmeter; //fps meter
 
   function createBoard() {
     var newBoard = [];
@@ -96,7 +94,6 @@ function createCanvasController(canvas) {
    
   function gotStartMatch(params) {
     $rootScope.isHelpModalShown = false;
-    fpsmeter = new window.FPSMeter({graph: true, theme: 'dark', left: '5px'});
     yourPlayerIndex = params.yourPlayerIndex;
     playersInfo = params.playersInfo;
     matchController = params.matchController;
@@ -323,7 +320,6 @@ function createCanvasController(canvas) {
   }
 
   function draw() {
-   // fpsmeter.tickStart();
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
     ctx.strokeStyle = "black";
@@ -360,11 +356,9 @@ function createCanvasController(canvas) {
         }
       }
     }
-    //fpsmeter.tick();
   }
 
   function drawCountDown() {
-    fpsmeter.tickStart();
     var secondsFromStart = 0;
     if ($rootScope.isHelpModalShown) {
       secondsFromStart = Math.floor((pauseStartTime - totalPauseTime - startMatchTime) / 1000);
@@ -389,7 +383,6 @@ function createCanvasController(canvas) {
       msg = $translate("YOUR_COLOR",
           {color: $translate(yourColor.toUpperCase())});
       ctx.fillText(msg, canvasWidth / 2 - 20 , canvasHeight / 4 - 5);
-      fpsmeter.tick();
       countDownInterval  = requestAnimationFrame(drawCountDown);
     } else {
       isGameOngoing = true;
@@ -402,7 +395,6 @@ function createCanvasController(canvas) {
   var isReliable = false;
   
   function updateAndDraw(timestamp) {
-    fpsmeter.tickStart();
     if (!isGameOngoing) {
       return;
     }
@@ -420,7 +412,6 @@ function createCanvasController(canvas) {
       sendMessage(isReliable);
     }
     draw();
-    fpsmeter.tick();
     drawInterval = requestAnimationFrame(updateAndDraw);
   }
   $rootScope.updateAndDraw = updateAndDraw;
